@@ -1,0 +1,33 @@
+#layer of data for buidling permits 
+build.perm.shp <- sf::st_read("Building_Permits.shp")
+
+map("worldHires","Canada", xlim=c(-123.2,-123),ylim=c(49.5, 49.7), col="gray90", fill=TRUE)
+
+
+plot(build.perm.shp, add=TRUE, xlim=c(-123.2,-123),ylim=c(49.5, 49.7), col=alpha("darkgreen", 0.6), border=FALSE)
+#Suppose to plot building permits
+plot <- plot(build.perm.shp, add=TRUE, xlim=c(-123.2,-123),ylim=c(49.5, 49.7), col=alpha("darkgreen", 0.6), border=FALSE)
+#plot the inaturalist observations. 
+points(cleaned.inatur$lon, cleaned.inatur$lat, pch=19, col="red", cex=0.5)  #plot my sample sites
+
+map <- points(cleaned.inatur$lon, cleaned.inatur$lat, pch=19, col="red", cex=0.5)
+
+
+
+#Building permits data mapping. 
+
+#mapping tool
+build.perm.map <- sf::st_read("Building_Permits.shp")
+build.perm.map <- st_read("Building_Permits.shp")
+str(build.perm.map)
+str(build.perm.map$geometry)
+
+#get spatial spread of building permits. 
+coordinate.map <- ggplot(build.perm.map) + geom_sf()
+str(coordinate.map)
+#list
+build.perm.map$geometry <- as.matrix(build.perm.map$geometry)
+
+#plot all variables = 19 
+plot <- plot(build.perm.map, max.plot = 19)
+st_polygon(build.perm.map$geometry)
