@@ -63,7 +63,10 @@ library(mapdata)
 
 
 -------------------------------------------------------------------------------
-getwd()
+-------------------------------------------------------------------------------
+setwd("~/Desktop/R/Final Project")
+wk.di <- getwd()
+
 
 #=======Import raw data sets from iNaturalist ==================================
 inatur <- read.csv("inaturalist.csv")   
@@ -74,8 +77,6 @@ str(inatur)
 build.perm <- read.csv("Building_Permits.csv")
 str(build.perm)
 
-busin.lic <- read.csv("Business_Licence_Monthly.csv")
-
 # ==== Creating Dataframes ====================================================
 taxa <- as.data.frame(inatur$iconic_taxon_name, stringsAsFactors=FALSE)
 inatur <- as.data.frame(inatur, stringsAsFactors=FALSE)
@@ -84,61 +85,31 @@ inatur <- as.data.frame(inatur, stringsAsFactors=FALSE)
 #Remove all rows without taxa name from the data sets. 
 cleaned.inatur <- inatur[!(is.na(inatur$iconic_taxon_name) | 
                              inatur$iconic_taxon_name ==""), ]
-taxa <- inatur[!(is.na(taxa) | 
-                             taxa ==""), ]
-cleaned.inatur[253, "V"]
+str(cleaned.inatur)
 
 
-#organizing data frame by date. 
-cleaned.inatur[order(as.Date(cleaned.inatur$iconic_taxon_name, format="%Y-%m-%d")),]
-
-time <- cleaned.inatur[order(as.Date(cleaned.inatur$iconic_taxon_name, format="%Y-%m-%d")),]
-
-?as.Date
-
-#Time frame for building permits 
-starting.year <- "2019/01/01 00:00:00+00"
-ending.year <- "2021/12/31 00:00:00+00"
-
-#organising data frame by date. 
-cleaned.taax [order(as.Date(d$V3, format="%d/%m/%Y")),]
+#get of rid of all non-necessary columns???
 
 
-longitude <- 
-latitude <- inat
+#Specify columns of interest
+cols(
+  observed_on = col_character(),
+  latitude = col_character(),
+  longitude = col_character(),
+  scientific_name = col_character(),
+  common_name = col_character(),
+  iconic_taxon_name = col_character(),
+  taxon_id = col_character(),
+)
 
+head(cleaned.inatur)
 
+#how many unique value is there is column
+sapply(cleaned.inatur, function(x) length(unique(x)))
+# 4192 unique taxon Id observed in the Squamish area. 
 
-# ====== Testing some Figures =================================================
-
-#mapping tool
-build.perm.map <- sf::st_read("Building_Permits.shp")
-build.perm.map <- st_read("Building_Permits.shp")
-str(build.perm.map)
-
-#get spatial spread of building permits. 
-coordinate.map <- ggplot(build.perm.map) + geom_sf()
-str(coordinate.map)
-
-
-#plot all variables = 19 
-plot <- plot(build.perm.map, max.plot = 19)
-str(plot)
-
-plot(build.perm.map$geometry) # Why do I not have the boundary of the map? 
-
-#problems with spatial points Need to find actual map
-tm_shape(build.perm.map) + tm_polygons(build.perm.map$geometry)
-
-#Need a map of Squamish divided into polygons WHHERE?
-#Convert list to numeric values. 
-build.perm.map <- as.numeric(unlist(build.perm.map))
-polygon(build.perm.map)
-
-show.poly <- polygon(build.perm.map)
-
-
-
-
-#plot types of building type  --> fix. GOOD SHIT. 
-hist(build.perm.map$Applicatio, breaks = 6)
+#Determine how many unique species in each iconic taxonomic group. 
+spp_per_group <-cleaned.inatur%>%
+  group_by(iconic_taxon_name) %>%
+  summarise(species = n())
+print(spp_per_group)
