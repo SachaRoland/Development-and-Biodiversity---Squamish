@@ -95,6 +95,16 @@ molluscs_sf <- molluscs %>%
          scientific_name ) %>% 
   st_as_sf(coords=c("longitude", "latitude"), crs=4326) # crs found 
 
+#combined data set coordinates
+sp.xy <- cbind(molluscs$longitude, molluscs$latitude)
+#determine spatial point 
+sp.pts.all <- SpatialPointsDataFrame(sp.xy,
+                                     molluscs,
+                                     proj4string = wgs84crs)
+
+
+
+
 ============================ Get Squamish boundary from Zoning.shp =======================
 #read shp file.
 squam.boundary <- st_read("Zoning_Classification.shp")
@@ -130,15 +140,33 @@ x <- raster(r)
 crs(x) <- "+proj=utm +zone=12 +datum=WGS84 +no_defs +ellps=WGS84"
 
 squam.boundaryWGS84 <- projectRaster(r, x)
-
+       
+#create object for crs for future use. 
+WGS84CRS <- crs(squamish boundary)
+       
+       
+#Combine spatial coordinate of taxon
+sp.xy <- cbind(molluscs$longitude, molluscs$latitude)
+#Create spatial data point frame from the coordinates.
+sp.pts.all <- SpatialPointsDataFrame(sp.xy,
+                                     molluscs,
+                                     proj4string = WGS84CRS)       
        
        
        
+   
        
 #transform boundary into geographic coordinates
 squam.boundary.trans <- st_read("Zoning_Classification.shp", quiet=TRUE) %>%
   st_transform()  #needs WGS84
 
 
+       
+========================= Plot spatial point of Squamish boundary ==========
+       
+sp.points.squam <- sp_pts_all[squam.boundary$Type, ] ## Does no work becuase there NA's in the data set. get ride of them and retry. 
+       
+
+squam.bd <- is.na(squam.boundary)
 
 
