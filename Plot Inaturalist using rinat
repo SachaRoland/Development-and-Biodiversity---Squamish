@@ -1,0 +1,24 @@
+#Plot intaurlist species using Rinat package. 
+
+#For a simple plot of a specific taxon 
+#Plot inaturalist data 
+plot(plants$longitude, plants$latitude)
+
+
+# for dsitirrbutionand lsit of species presnet in the boundaries determined. 
+#Mapping inaturalist data 
+amphibia <- get_inat_obs(taxon_name = "Amphibia",
+                       quality = "research",
+                       maxresults = 1000, bounds = bounds, year = 2020)
+ggplot(data = amphibia, aes(x = longitude,
+                           y = latitude,
+                           colour = scientific_name)) +
+  geom_polygon(data = map_data("world"),
+               aes(x = long, y = lat, group = group),
+               fill = "grey95",
+               color = "gray40",
+               size = 0.1) +
+  geom_point(size = 0.7, alpha = 0.5) +
+  coord_fixed(xlim = range(amphibia$longitude, na.rm = TRUE),
+              ylim = range(amphibia$latitude, na.rm = TRUE)) +
+  theme_bw()
