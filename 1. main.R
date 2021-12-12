@@ -147,6 +147,10 @@ zone.type <- squam.boundary%>%
   summarise(type = n())
 print(zone.type)
 
+#map a map of Squamish
+ggplot()+ geom_sf(data = squam.boundary)
+       
+       
 
 # Check crs format of shp file and and create an object. 
 NAD83CRS <- st_crs(squam.boundary)
