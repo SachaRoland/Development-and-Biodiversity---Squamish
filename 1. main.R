@@ -184,7 +184,9 @@ sp.xy <- cbind(molluscs$longitude, molluscs$latitude)
 sp.pts.all <- SpatialPointsDataFrame(sp.xy,
                                      molluscs,
                                      proj4string = WGS84CRS)       
-       
+
+ggplot()+ 
+  geom_sf(data = squam.boundary, aes(molluscs_sf$geometry))
        
          
 #transform boundary into geographic coordinates
