@@ -95,6 +95,9 @@ molluscs_sf <- molluscs %>%
          scientific_name ) %>% 
   st_as_sf(coords=c("longitude", "latitude"), crs=4326) # crs found 
 
+#check to dimension of the data set 
+dim(molluscs_sf).  ## understand what this says exactly. 
+
 #combined data set coordinates
 sp.xy <- cbind(molluscs$longitude, molluscs$latitude)
 #determine spatial point 
@@ -144,7 +147,12 @@ squam.boundaryWGS84 <- projectRaster(r, x)
 #create object for crs for future use. 
 WGS84CRS <- crs(squamish boundary)
        
+#structure still do not macth up..... ## work more on this. 
+st_crs(molluscs_sf)
+st_crs(squam.boundaryWGS84)
+              
        
+         
 #Combine spatial coordinate of taxon
 sp.xy <- cbind(molluscs$longitude, molluscs$latitude)
 #Create spatial data point frame from the coordinates.
@@ -153,9 +161,7 @@ sp.pts.all <- SpatialPointsDataFrame(sp.xy,
                                      proj4string = WGS84CRS)       
        
        
-       
-   
-       
+         
 #transform boundary into geographic coordinates
 squam.boundary.trans <- st_read("Zoning_Classification.shp", quiet=TRUE) %>%
   st_transform()  #needs WGS84
