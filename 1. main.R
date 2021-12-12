@@ -64,52 +64,81 @@ library(mapdata)
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
-setwd("~/Desktop/R/Final Project")
+setwd("~/Desktop/R/Fresh")
 wk.di <- getwd()
 
-
-#=======Import raw data sets from iNaturalist ==================================
-inatur <- read.csv("inaturalist.csv")   
-#data quick check
-head(inatur)
-str(inatur)
-
-build.perm <- read.csv("Building_Permits.csv")
-str(build.perm)
-
-# ==== Creating Dataframes ====================================================
-taxa <- as.data.frame(inatur$iconic_taxon_name, stringsAsFactors=FALSE)
-inatur <- as.data.frame(inatur, stringsAsFactors=FALSE)
-
-#cleaning  iNaturalist data
-#Remove all rows without taxa name from the data sets. 
-cleaned.inatur <- inatur[!(is.na(inatur$iconic_taxon_name) | 
-                             inatur$iconic_taxon_name ==""), ]
-str(cleaned.inatur)
+--------------------
+#Determine bounds based on the Squamish district coordinates 
+bounds <- c(49.680314, -123.219144, 49.824274, -123.081815)
 
 
-#get of rid of all non-necessary columns???
+#Get Inaturalist data for different taxon in Squamish in 2020 using rinat package
+plants <- get_inat_obs (taxon_name = "Plantae", bounds = bounds, year = 2020)
+amphibians <- get_inat_obs (taxon_name = "Amphibia", bounds = bounds, year = 2020)
+birds <- get_inat_obs (taxon_name = "Aves", bounds = bounds, year = 2020)
+fungi <- get_inat_obs (taxon_name = "Fungi", bounds = bounds, year = 2020)
+insects <- get_inat_obs (taxon_name = "Insecta", bounds = bounds, year = 2020)
+arachnids <- get_inat_obs (taxon_name = "Arachnida", bounds = bounds, year = 2020)
+reptiles <-get_inat_obs (taxon_name = "Reptilia", bounds = bounds, year = 2020)
+mammals <- get_inat_obs (taxon_name = "Mammalia", bounds = bounds, year = 2020)
+fish <- get_inat_obs (taxon_name = "Actinopterygii", bounds = bounds, year = 2020)
+molluscs <- get_inat_obs (taxon_name = "Mollusca", bounds = bounds, year = 2020)
 
 
-#Specify columns of interest
-cols(
-  observed_on = col_character(),
-  latitude = col_character(),
-  longitude = col_character(),
-  scientific_name = col_character(),
-  common_name = col_character(),
-  iconic_taxon_name = col_character(),
-  taxon_id = col_character(),
-)
+#determine crs for fo date sets. 
+st_crs()
 
-head(cleaned.inatur)
+#convert data in spartial data. 
+#convert into shapefile. 
+molluscs_sf <- molluscs %>% 
+  select(longitude, latitude, datetime, common_name, 
+         scientific_name ) %>% 
+  st_as_sf(coords=c("longitude", "latitude"), crs=4326) # crs found 
 
-#how many unique value is there is column
-sapply(cleaned.inatur, function(x) length(unique(x)))
-# 4192 unique taxon Id observed in the Squamish area. 
+============================ Get Squamish boundary from Zoning.shp =======================
+#read shp file.
+squam.boundary <- st_read("Zoning_Classification.shp")
+names(squam.boundary)
 
-#Determine how many unique species in each iconic taxonomic group. 
-spp_per_group <-cleaned.inatur%>%
-  group_by(iconic_taxon_name) %>%
-  summarise(species = n())
-print(spp_per_group)
+#Determine projected CRS --> NAD83 / UTM zone 10N
+dplyr::filter(squam.boundary)
+squam.boundary$Type
+str(squam.boundary$Type)
+
+#how many zone types is there is Squamish?
+sapply(squam.boundary, function(x) length(unique(x)))
+
+# have a look at all the zone types
+zone.type <- squam.boundary%>%
+  group_by(Type) %>%
+  summarise(type = n())
+print(zone.type)
+
+
+# Check crs format of shp file and and create an object. 
+NAD83CRS <- st_crs(squam.boundary)
+
+#Plot zones in Squamish + legends. 
+plot(squam.boundary[5])
+
+# for inaturalist and Squamish boundary data to be compatible, they need need to hae the same crs. 
+#convert squamish boudnary crs to WGS84 using package raster
+      
+r <- raster(squam.boundary)
+#set up an output
+x <- raster(r)
+crs(x) <- "+proj=utm +zone=12 +datum=WGS84 +no_defs +ellps=WGS84"
+
+squam.boundaryWGS84 <- projectRaster(r, x)
+
+       
+       
+       
+       
+#transform boundary into geographic coordinates
+squam.boundary.trans <- st_read("Zoning_Classification.shp", quiet=TRUE) %>%
+  st_transform()  #needs WGS84
+
+
+
+
