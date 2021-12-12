@@ -73,22 +73,42 @@ bounds <- c(49.680314, -123.219144, 49.824274, -123.081815)
 
 
 #Get Inaturalist data for different taxon in Squamish in 2020 using rinat package
-plants <- get_inat_obs (taxon_name = "Plantae", bounds = bounds, year = 2020)
-amphibians <- get_inat_obs (taxon_name = "Amphibia", bounds = bounds, year = 2020)
-birds <- get_inat_obs (taxon_name = "Aves", bounds = bounds, year = 2020)
-fungi <- get_inat_obs (taxon_name = "Fungi", bounds = bounds, year = 2020)
-insects <- get_inat_obs (taxon_name = "Insecta", bounds = bounds, year = 2020)
-arachnids <- get_inat_obs (taxon_name = "Arachnida", bounds = bounds, year = 2020)
-reptiles <-get_inat_obs (taxon_name = "Reptilia", bounds = bounds, year = 2020)
-mammals <- get_inat_obs (taxon_name = "Mammalia", bounds = bounds, year = 2020)
-fish <- get_inat_obs (taxon_name = "Actinopterygii", bounds = bounds, year = 2020)
-molluscs <- get_inat_obs (taxon_name = "Mollusca", bounds = bounds, year = 2020)
+plants <- get_inat_obs (taxon_name = "Plantae", bounds = bounds, year = 2020, 
+                        maxresults = 1000)
+amphibians <- get_inat_obs (taxon_name = "Amphibia", bounds = bounds, 
+                            year = 2020,maxresults = 1000)
+birds <- get_inat_obs (taxon_name = "Aves", bounds = bounds, year = 2020, 
+                       maxresults = 1000)
+fungi <- get_inat_obs (taxon_name = "Fungi", bounds = bounds, year = 2020, 
+                       maxresults = 1000)
+insects <- get_inat_obs (taxon_name = "Insecta", bounds = bounds, year = 2020, 
+                         maxresults = 1000)
+arachnids <- get_inat_obs (taxon_name = "Arachnida", bounds = bounds, 
+                           year = 2020, maxresults = 1000)
+reptiles <-get_inat_obs (taxon_name = "Reptilia", bounds = bounds, year = 2020, 
+                         maxresults = 1000)
+mammals <- get_inat_obs (taxon_name = "Mammalia", bounds = bounds, year = 2020, 
+                         maxresults = 1000)
+fish <- get_inat_obs (taxon_name = "Actinopterygii", bounds = bounds, 
+                      year = 2020, maxresults = 1000)
+molluscs <- get_inat_obs (taxon_name = "Mollusca", bounds = bounds, year = 2020, 
+                          maxresults = 1000)
+
+==========================================================================================
+#Quick check of species within each taxon. #Can I create a loop here? 
 
 
-#determine crs for fo date sets. 
+spp_per_group <- amphibians%>%
+  group_by(scientific_name) %>%
+  summarise(species = n())
+print(spp_per_group)
+
+
+#determine crs for the date sets. 
 st_crs()
 
-#convert data in spartial data. 
+
+#convert data in spartial data for each data set . 
 #convert into shapefile. 
 molluscs_sf <- molluscs %>% 
   select(longitude, latitude, datetime, common_name, 
@@ -152,7 +172,8 @@ st_crs(molluscs_sf)
 st_crs(squam.boundaryWGS84)
               
        
-         
+#=========== plot inaturlaist data on Zoning Squamish map =================================  
+       
 #Combine spatial coordinate of taxon
 sp.xy <- cbind(molluscs$longitude, molluscs$latitude)
 #Create spatial data point frame from the coordinates.
