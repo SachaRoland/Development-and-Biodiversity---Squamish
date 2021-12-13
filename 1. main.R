@@ -38,6 +38,13 @@ library(leaflet)
 library(conflicted)
 library(ggplot2)
 
+# Set preferences for conflicting libraries
+conflict_prefer("filter", "dplyr", quiet = TRUE)
+conflict_prefer("count", "dplyr", quiet = TRUE)
+conflict_prefer("select", "dplyr", quiet = TRUE)
+conflict_prefer("arrange", "dplyr", quiet = TRUE)
+conflict_prefer("map", "maps", quiet=TRUE)
+
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 wk.di <- getwd()
