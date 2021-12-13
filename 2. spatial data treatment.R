@@ -124,7 +124,7 @@ htmltools::p("Building Permits in Squamish",
                          
 ========================= 5)Mapping using leaflet =============================================         
 
-# Bring iNaturalist observations and buidling permits by compiling addCircleMarkers arguments
+# Bring iNaturalist observations and buidling permits together by compiling addCircleMarkers arguments
 
 leaflet(squamish.boundary.sf) %>% 
   addProviderTiles("Esri.WorldStreetMap") %>% 
