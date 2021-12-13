@@ -1,4 +1,4 @@
-#Description
+#======================= Description ================================================
 
 Coming soon...
 
@@ -10,7 +10,7 @@ squamish.boundary.sf <- sf::st_read("Zoning_Classification.shp")
 #Read and transform the Squamish Zones Boundary to spatial coordinates   
 build.perm.sf<- sf::st_read("Building_Permits.shp")                 
 
-========================2) Apply Squamish boundary on a map ============================
+#========================2) Apply Squamish boundary on a map ==========================
 
 #First we need to transform the Squamsih boundary to geopgraphic coordinates.
 squamish.boundary.sf <- st_read("Zoning_Classification.shp", quiet=TRUE) %>%
@@ -27,7 +27,7 @@ squamish.boundary.bb <- st_bbox(squamish.boundary.sf)
 # Create object with bounds
 bounds <- c(49.63866, -123.26034, 49.87288, -123.01753) --> use a general variables, put in main.
 
-================== 3)Extract data from iNaturalist ==============================================
+#================== 3)Extract data from iNaturalist ==============================================
 
 # Get data from specific taxa in Squamihs the Squamish area using rinat package. 
 # use object bound to define the spread of results. 
@@ -80,7 +80,7 @@ htmltools::p("iNaturalist Observations in Squamish",
              style = "font-weight:bold; font-size:110%")
              
 
-===================== 4) Check and treat building permits data ================
+#===================== 4) Check and treat building permits data =====================
 
 # Familiarize with sf file's CRS type, columns, and geometry. 
 str(build.perm.sf)
@@ -122,9 +122,10 @@ htmltools::p("Building Permits in Squamish",
                              
                              
                          
-========================= 5)Mapping using leaflet =============================================         
+#========================= 5)Mapping using leaflet =============================================      
 
-# Bring iNaturalist observations and buidling permits together by compiling addCircleMarkers arguments
+# Bring iNaturalist observations and buidling permits together by compiling 
+# addCircleMarkers arguments
 
 leaflet(squamish.boundary.sf) %>% 
   addProviderTiles("Esri.WorldStreetMap") %>% 
@@ -137,7 +138,7 @@ addCircleMarkers(data = amphibians.popup.sf,
                  radius = 2, color = "red", weight = 3, )  
                           
 
-========================= 4) Determine quadrats ... ================================================
+#========================= 6) Determine quadrats ... ================================================
 # ... to count species richness and density and builing permits density at different locations
 # within Squamish boundaries. 
                                 
@@ -151,7 +152,7 @@ addCircleMarkers(data = amphibians.popup.sf,
                                 
                                 
                                 
-============================= More inaturalist data to get if I have time to treat them. ============           
+#============================= More inaturalist data to get if I have time to treat them. ============           
 
 #Get Inaturalist data for different taxon in Squamish in 2020 using rinat package
 plants <- get_inat_obs (taxon_name = "Plantae", bounds = bounds, year = 2021, 
