@@ -18,188 +18,61 @@
 # comment these out after first use, or if other values are desired
 
 
-#=====Install packages required for mapping=====================================
-install.packages("sp") 
-install.packages("sf")
-install.packages("maptools")
-install.packages("rgeos")
-install.packages("rgdal")
-install.packages("raster")
-install.packages("RCurl")
-install.packages("USAboundaries")
-install.packages("jsonlite")
-install.packages("geojsonio")
-install.packages("maps")
-install.packages("tmap")
-install.packages("micromap")
-install.packages("ggrepel")
-install.packages("ggmap")
-install.packages("mapview")
-install.packages("plotly")
-install.packages("tidyverse")
-install.packages("mapdata")
+#===== Packages and libraries =====================================
+#install.packages("sf")
+#install.packages("maps")
+#install.packages("tmap")
+#install.packages("ggmap")
+#install.packages("mapdata")
+#install.packages(rinat)
+#install.packages(dplyr)
+#install.packages(leaflet)
+#install.packages(conflicted)
+#install.packages(ggplot2)
 
-#======== Open Libraries fro mapping ===========================================
-library(maptools)
+library(rinat)
 library(sf)
-library(rgeos)
-library(rgdal)
-library(raster)
-library(RCurl)
-library(USAboundaries)
-library(jsonlite)
-library(geojsonio)
-library(maps)
+library(dplyr)
 library(tmap)
-library(micromap)
-library(ggrepel)
-library(ggmap)
-library(mapview)
-library(sf)
+library(leaflet)
+library(conflicted)
 library(ggplot2)
-library(plotly)
-library(tidyverse)
-library(mapdata)
-
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
-setwd("~/Desktop/R/Fresh")
 wk.di <- getwd()
 
---------------------
-#Determine bounds based on the Squamish district coordinates 
-bounds <- c(49.680314, -123.219144, 49.824274, -123.081815)
+# === folder management ========================================================
+
+## names of project folders("a.spatial data treatment","b.mapping","c.analyis")
+## store names of the folders in an object
+
+# folder names
+## the a b c makes them ordered again, but not 
+folder.names <- c("a.spatial data treatment","b.mapping")
+
+# create folders if they don't exit yet. 
+for(i in 1:length(folder.names)){ 
+  if(file.exists(folder.names[i]) == FALSE){
+    dir.create(folder.names[i])
+  } 
+}
 
 
-#Get Inaturalist data for different taxon in Squamish in 2020 using rinat package
-plants <- get_inat_obs (taxon_name = "Plantae", bounds = bounds, year = 2020, 
-                        maxresults = 1000)
-amphibians <- get_inat_obs (taxon_name = "Amphibia", bounds = bounds, 
-                            year = 2020,maxresults = 1000)
-birds <- get_inat_obs (taxon_name = "Aves", bounds = bounds, year = 2020, 
-                       maxresults = 1000)
-fungi <- get_inat_obs (taxon_name = "Fungi", bounds = bounds, year = 2020, 
-                       maxresults = 1000)
-insects <- get_inat_obs (taxon_name = "Insecta", bounds = bounds, year = 2020, 
-                         maxresults = 1000)
-arachnids <- get_inat_obs (taxon_name = "Arachnida", bounds = bounds, 
-                           year = 2020, maxresults = 1000)
-reptiles <-get_inat_obs (taxon_name = "Reptilia", bounds = bounds, year = 2020, 
-                         maxresults = 1000)
-mammals <- get_inat_obs (taxon_name = "Mammalia", bounds = bounds, year = 2020, 
-                         maxresults = 1000)
-fish <- get_inat_obs (taxon_name = "Actinopterygii", bounds = bounds, 
-                      year = 2020, maxresults = 1000)
-molluscs <- get_inat_obs (taxon_name = "Mollusca", bounds = bounds, year = 2020, 
-                          maxresults = 1000)
+# ******************************************************************************
 
-==========================================================================================
-#Quick check of species within each taxon. #Can I create a loop here? 
+# paths to the folders. The 'p.' indicates the variable is a path.
+# make sure the variable names describe the folder.names
+p.data.raw <- paste(wk.dir, "/", folder.names[1], "/", sep = "")
+p.fig <- paste(wk.dir, "/", folder.names[2], "/", sep = "")
 
+# === run script ===============================================================
 
-spp_per_group <- amphibians%>%
-  group_by(scientific_name) %>%
-  summarise(species = n())
-print(spp_per_group)
+## you can run a scripts file as a batch the start. Only do this for code which  
+## is really needed to run other script files. Take care not to force the user
+## to run the whole project at once especially when computationally intensive
 
+# run scripts needed to make other scripts files work (e.g. functions.R)
+#source("your.code.R")
 
-#determine crs for the date sets. 
-st_crs()
-
-
-#convert data in spartial data for each data set . 
-#convert into shapefile. 
-molluscs_sf <- molluscs %>% 
-  select(longitude, latitude, datetime, common_name, 
-         scientific_name ) %>% 
-  st_as_sf(coords=c("longitude", "latitude"), crs=4326) # crs found 
-
-#check to dimension of the data set 
-dim(molluscs_sf).  ## understand what this says exactly. 
-
-#combined data set coordinates
-sp.xy <- cbind(molluscs$longitude, molluscs$latitude)
-#determine spatial point 
-sp.pts.all <- SpatialPointsDataFrame(sp.xy,
-                                     molluscs,
-                                     proj4string = wgs84crs)
-
-
-
-
-============================ Get Squamish boundary from Zoning.shp =======================
-#read shp file.
-squam.boundary <- st_read("Zoning_Classification.shp")
-names(squam.boundary)
-
-#Determine projected CRS --> NAD83 / UTM zone 10N
-dplyr::filter(squam.boundary)
-squam.boundary$Type
-str(squam.boundary$Type)
-
-#how many zone types is there is Squamish?
-sapply(squam.boundary, function(x) length(unique(x)))
-
-# have a look at all the zone types
-zone.type <- squam.boundary%>%
-  group_by(Type) %>%
-  summarise(type = n())
-print(zone.type)
-
-#map a map of Squamish
-ggplot()+ geom_sf(data = squam.boundary)
-       
-       
-
-# Check crs format of shp file and and create an object. 
-NAD83CRS <- st_crs(squam.boundary)
-
-#Plot zones in Squamish + legends. 
-plot(squam.boundary[5])
-
-# for inaturalist and Squamish boundary data to be compatible, they need need to hae the same crs. 
-#convert squamish boudnary crs to WGS84 using package raster
-      
-r <- raster(squam.boundary)
-#set up an output
-x <- raster(r)
-crs(x) <- "+proj=utm +zone=12 +datum=WGS84 +no_defs +ellps=WGS84"
-
-squam.boundaryWGS84 <- projectRaster(r, x)
-       
-#create object for crs for future use. 
-WGS84CRS <- crs(squamish boundary)
-       
-#structure still do not macth up..... ## work more on this. 
-st_crs(molluscs_sf)
-st_crs(squam.boundaryWGS84)
-              
-       
-#=========== plot inaturlaist data on Zoning Squamish map =================================  
-       
-#Combine spatial coordinate of taxon
-sp.xy <- cbind(molluscs$longitude, molluscs$latitude)
-#Create spatial data point frame from the coordinates.
-sp.pts.all <- SpatialPointsDataFrame(sp.xy,
-                                     molluscs,
-                                     proj4string = WGS84CRS)       
-
-ggplot()+ 
-  geom_sf(data = squam.boundary, aes(molluscs_sf$geometry))
-       
-         
-#transform boundary into geographic coordinates
-squam.boundary.trans <- st_read("Zoning_Classification.shp", quiet=TRUE) %>%
-  st_transform()  #needs WGS84
-
-
-       
-========================= Plot spatial point of Squamish boundary ==========
-       
-sp.points.squam <- sp_pts_all[squam.boundary$Type, ] ## Does no work becuase there NA's in the data set. get ride of them and retry. 
-       
-
-squam.bd <- is.na(squam.boundary)
-
-
+#___ end _______________________________________________________________________
