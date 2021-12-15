@@ -22,7 +22,8 @@ squamish.boundary.sf <- st_read("Zoning_Classification.shp", quiet=TRUE) %>%
                                 st_transform(4326) #EPS code for spatial data format
 
 # Use leaflet to map the boundaries 
-leaflet(squamish.boundary.sf[5])%>%   #[5] gives us option to determine different zone types
+#[5] gives us option to determine different zone types
+leaflet(squamish.boundary.sf[5])%>%  
   addTiles() %>% 
   addPolygons(weight = 1) 
   
@@ -30,7 +31,7 @@ leaflet(squamish.boundary.sf[5])%>%   #[5] gives us option to determine differen
 squamish.boundary.bb <- st_bbox(squamish.boundary.sf)
 
 # Create object with bounds
-bounds <- c(49.63866, -123.26034, 49.87288, -123.01753) --> use a general variables, put in main.
+bounds <- c(49.63866, -123.26034, 49.87288, -123.01753)
 
 
 
@@ -44,7 +45,7 @@ bounds <- c(49.63866, -123.26034, 49.87288, -123.01753) --> use a general variab
 amphibians <-get_inat_obs (taxon_name = "Amphibia", bounds = bounds, year = 2021, 
                          maxresults = 1000)
                          
-# Familiarize with some of the charasteristics of the taxon.
+# Familiarize with some of the characteristics of the taxon.
 str(amphibians)
 dim(amphibians)
 glimpse(amphibians)     
@@ -69,7 +70,7 @@ dim(amphibians.sf)
 amphi.insquam.b.sf <- amphibians.sf %>% 
   st_intersection(squamish.boundary.sf)
 # Check how many observations are in the area
-nrow(amphibians.out.bound)
+nrow(amphi.insquam.b.sf)
 
 
 #================== 4)Map Inaturalist data using Leaflet ==============================================
