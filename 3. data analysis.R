@@ -1,25 +1,38 @@
-# In order to see wether buidling permits is negatively correlated with amphibian species occurence
-# We need to run a correlation analysis using Pearson's correlation coefficient. 
+# ========= Correlation analysis ==========================================
 
 
-# explain what steps would need to be taken to actually measure biodiversity. 
-# How would we deal with all the taxa? 
-# what kind of fucnction? --> Shannon's index. 
-
-
-# Use objects used to create the quadrants to create a data frame. 
-# Since the grid is the same for both amphibians and buiding permit data points, the order of grid cell 
-# is the same. The the numbers of data point for each variables are thus sort of paired within each quadrant.
-
-# Create a data frame using tibble()
+# Create a data frame from grid data 
+# Using tibble() (data_frame runs risks deprecation)
 grid.data.frame <- tibble(build.grid$count, amphi.grid$count)
+Amphibians <- grid.data.frame$`amphi.grid$count`
+Build.perm <- grid.data.frame$`build.grid$count`
 
-#Should be able to get a bird.grid$count that can be combine to amphibians. 
-# all.taxa and build.grid would then become new data frame for stat analysis.
 
-# get plot with  number building permits as the explanatory variable and 
-# amphibian occurrence as the response variable. 
-plot(grid.data.frame)
+# Determine critical t-value 
+qt(0.05, 46, lower.tail=FALSE)
 
-# Do a mini correlation test
-cor(amphi.grid$count, build.grid$count, method = "pearson") 
+# Run Pearson's Correlation test
+cor.test(build.grid$count, amphi.grid$count, method = "pearson")
+
+# t-obtained does not exceed t-critical. 
+# there is no significant linear correlation between amphibians observations and 
+# building permits in Squamish. 
+# p- value = 0.2684 --> meaning that there is a 27% probability that our result 
+# occurred due to chance. 
+# We fail to reject to null-hypothesis. 
+
+# get plot with  number of building permits as the explanatory variable and 
+# number of amphibians observation as the response variable. 
+plot(Build.perm, Amphibians, xlab ="Building Permits", 
+     ylab = "Amphibian Observations")
+
+
+#========== Extra ==============================================================
+
+# Regression line 
+lm(Build.perm ~ Amphibians) # very strange results 
+abline(lm(Build.perm ~ Amphibians))
+# crazy slope. 
+# y-intercepts cannot be interpreted in a meaningful way.
+# it is therefore absolutely unsafe to say that the number of building permits 
+# has an effect on the number of amphibian observations. 
