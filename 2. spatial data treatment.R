@@ -7,6 +7,11 @@
 
 #======================= 1)Read raw data ============================================
 
+#first unzip required folders 
+unzip (Zoning 
+
+
+
 #Read the Squamish Zones Boundary shapefile               
 squamish.boundary.sf <- sf::st_read("Zoning_Classification.shp")
    
