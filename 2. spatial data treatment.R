@@ -240,6 +240,7 @@ leaflet() %>%
           position = "topright", group = "Building Permit")
 
 
+### treatment of data from quadrants in 3) Data Analysis.R
 
 
 
