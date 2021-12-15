@@ -170,11 +170,11 @@ leaflet(squamish.boundary.sf) %>%
   addCircleMarkers(data = build.popup.sf,
                    popup = ~popup_html, 
                    radius = 2, color = "yellow", weight = 3) %>%
-  addCircleMarkers(data = amphibians.popup.sf,
+  addCircleMarkers(data = amphibians.popup.sf, group = "Amphibians",
                    popup = ~popup_html, 
                    radius = 2, color = "red", weight = 3, ) %>%
   addLayersControl(baseGroups = c("Buidling Permits", "Amphibians"),
-                   options = layersControlOptions(collapsed = TRUE))   
+                   options = layersControlOptions(collapsed = TRUE))      
 
 #This last function allows us to visualize different layers of the map. 
 
