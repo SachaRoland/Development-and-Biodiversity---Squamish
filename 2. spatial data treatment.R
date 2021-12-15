@@ -1,18 +1,23 @@
 #======================= Description ================================================
 
-Coming soon...
+# In this section, we will see how to usef the rinat, leaflet, and sf packages to map
+# to map public data from iNaturlist from the Squamish open data base about buidling permits. 
+# We will also see how to use map grids as quadrants useful for ecologicla studies.
+
 
 #======================= 1)Read raw data ============================================
 
-#Read and transform the Squamish Zones Boundary to spatial coordinates.               
+#Read the Squamish Zones Boundary shapefile               
 squamish.boundary.sf <- sf::st_read("Zoning_Classification.shp")
    
-#Read and transform the Squamish Zones Boundary to spatial coordinates   
+#Read the Squamish Building Permits shapefile
 build.perm.sf<- sf::st_read("Building_Permits.shp")      
 
 #========================2) Apply Squamish boundary on a map ==========================
 
-#First we need to transform the Squamsih boundary to geopgraphic coordinates.
+#First we need to transform the Squamsih boundary into geopgraphic coordinates by converting
+# the file into an sf object. 
+# We are using the CRS WPS84 - EPS:4326 for convenience.
 squamish.boundary.sf <- st_read("Zoning_Classification.shp", quiet=TRUE) %>%
                                 st_transform(4326) #EPS code for spatial data format
 
@@ -27,12 +32,14 @@ squamish.boundary.bb <- st_bbox(squamish.boundary.sf)
 # Create object with bounds
 bounds <- c(49.63866, -123.26034, 49.87288, -123.01753) --> use a general variables, put in main.
 
+
+
 #================== 3)Extract data from iNaturalist ==============================================
 
-# Now that we know the geographic dimension of Squamish boundary, we extract iNaturalist data 
+# Now that we know the geographic dimension of Squamish boundary, we can extract iNaturalist data 
 # for a specific location and a specific time using thr rinat package. 
 # In this case I only collect data for amphibians. The same process could be done for all taxa 
-# and/or specific species. 
+# and/or specific species. The taxon names and codes can be found on rinat resources. 
 
 amphibians <-get_inat_obs (taxon_name = "Amphibia", bounds = bounds, year = 2021, 
                          maxresults = 1000)
@@ -53,23 +60,22 @@ print(spp_per_group)
 amphibians.sf <- amphibians%>% 
   select(longitude, latitude, datetime, common_name, 
          scientific_name) %>% 
-  st_as_sf(coords=c("longitude", "latitude"), crs=4326) # geometry : POINT
+  st_as_sf(coords=c("longitude", "latitude"), crs=4326) # notice that geometry = POINT
 
 # Check if only the four columns we are interested in are kept. 
 dim(amphibians.sf)
 
-# Check if all our observations fall within the Squamish District area
-# some points fall outside of boundaries. --> Need to fix. 
+# Select amphibian observationns within the Squamish boundary. Exclude the others.
 amphi.insquam.b.sf <- amphibians.sf %>% 
   st_intersection(squamish.boundary.sf)
 # Check how many observations are in the area
 nrow(amphibians.out.bound)
 
+
 #================== 4)Map Inaturalist data using Leaflet ==============================================
 
 # Determine some arbitrary popup (small boxes containing arbitrary HTML code, 
 # that point to a specific point on the map). 
-#
 amphibians.popup.sf <- amphibians.insquamish.sf %>% 
   mutate(popup_html = paste0("<p><b>", common_name, "</b><br/>",
                              "<i>", scientific_name, "</i></p>",
@@ -97,7 +103,7 @@ leaflet(squamish.boundary.sf) %>%
              
 
 #===================== 4) Map building permits data =====================
-# we already made an sf object for data about building permits (build.perm.sf)
+# We already made an sf object for data about building permits (build.perm.sf)
 # Familiarize with sf file's CRS type, columns, and geometry. 
 str(build.perm.sf)
 names(build.perm.sf)
@@ -110,13 +116,14 @@ build.perm.sf$geometry    #Notice a different CRS format than for iNaturalist.
 st_crs(squamish.boundary.sf)
 st_crs(amphibians.sf). 
 
-# build.perm.sf's CRS is indeed different than squam.boundary and iNaturalist. 
+# Build.perm.sf's CRS is indeed different than squam.boundary and iNaturalist. 
 # Convert weird coordinate system to the same as squam.boundary and iNaturalist
 # --> (WGS84, EPS=4326; We can use the EPS code to do so. 
 build.perm.sf.WPS84 <- build.perm.sf %>% st_transform(4326)
 
-#check if CRS has been converted properly. 
+# Check if CRS has been converted properly. 
 st_crs(build.perm.sf.WPS84)
+
 
 # Do the same we did with iNaturalist data for buiding permits data.
 # Determine some arbitrary popup (small boxes containing arbitrary HTML code, 
@@ -171,21 +178,22 @@ options = layersControlOptions(collapsed = TRUE))
 
 
 #========================= 6) Determine quadrants ... ================================================
-# ... to count species richness and density and builing permits density at different locations
-# within Squamish boundaries. 
+# ... to count species occurence and builing permits at different locations within Squamish boundaries. 
 # The leaflet package allows us to visualize how many data points are found within each 
 # predefined grid cell. 
                                 
-# Create e grid of polygons (4x12) based on the boundary-box of the points 
-# for building permits which are all in Squamish boundary. 
-# Using build.perm.sf.WPS84 therefore allows us to plot the grid within the boundary.
+# Create e grid of polygons (4x12) based on the boundary-box of the building permits data points 
+# which are all within the Squamish boundary. 
+# Use build.perm.sf.WPS84 to plot the grid within the boundary.
 
 grid <- st_make_grid( st_as_sfc( st_bbox(build.perm.sf.WPS84)),
                             n = c(4, 12) ) %>% 
-  st_cast( "POLYGON" ) %>% st_as_sf()    
+  st_cast( "POLYGON" ) %>% st_as_sf()   
 
-# Count data points in each quadrant within the grid.
 
+
+
+# Visualize how many data points are in each quadrant within the grid.
 # ***** Do it for amphibians *****
 amphi.grid$count <- lengths( st_intersects(grid, amphibians.insquamish.sf))
 
@@ -229,6 +237,12 @@ leaflet() %>%
           labFormat = labelFormat(),
           opacity = 0.85, title = "Points counted per quadrant", 
           position = "topright", group = "Building Permit")
+
+
+
+
+
+
 
 
 
