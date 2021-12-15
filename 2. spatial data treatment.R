@@ -1,18 +1,11 @@
-#======================= Description ================================================
-
-# In this section, we will see how to usef the rinat, leaflet, and sf packages to map
-# to map public data from iNaturlist from the Squamish open data base about buidling permits. 
-# We will also see how to use map grids as quadrants useful for ecologicla studies.
-
 
 #======================= 1)Read raw data ============================================
 
-#first unzip required folders 
-#***** did this last minute. No time to test it. If doe not work please download files from github 
-# and place all files contained in eahc folder into your working directory.
-unzip("Zoning Data -Squamish")
+#First unzip required folders 
+#***** did this last minute. No time to test it. If does not work please download files from github 
+# and place all files contained in each folder into your working directory folder.
+unzip("Zoning Data - Squamish")
 unzip("Building_Permits Data - Squamish")
-
 
 
 #Read the Squamish Zones Boundary shapefile               
