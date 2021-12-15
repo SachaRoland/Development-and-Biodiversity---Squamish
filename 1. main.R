@@ -1,13 +1,12 @@
 
 #========General================================================================
-# Project by Sacha 
-#R version
-# "R version 4.1.2 (2021-11-01)"
+# Project by Sacha Roland; Quest University Canada
+# R version 4.1.2 (2021-11-01)
 
 #=============Script index======================================================
 # 1.Main.R        
-# 2.Data.manipulation.R
-# 3.Data analysis.R
+# 2.Spatial Data Treatment and Mapping.R
+# 3.Data Analysis.R
 # 4.Figures.R
 
 # === global variables =========================================================
