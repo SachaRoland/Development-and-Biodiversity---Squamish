@@ -28,7 +28,6 @@
 #install.packages("leaflet")
 #install.packages("conflicted")
 #install.packages("ggplot2")
-#install.packages("ggpubr")
 
 library(rinat)
 library(sf)
@@ -37,7 +36,6 @@ library(tmap)
 library(leaflet)
 library(conflicted)
 library(ggplot2)
-library(ggpubr)
 
 # Set preferences for conflicting libraries
 conflict_prefer("filter", "dplyr", quiet = TRUE)
