@@ -188,12 +188,9 @@ leaflet(squamish.boundary.sf) %>%
 # Create e grid of polygons (4x12) based on the boundary-box of the building permits data points 
 # which are all within the Squamish boundary. 
 
-grid <- st_make_grid( st_as_sfc( st_bbox(squamish.boundary.sf)),
+grid <- st_make_grid( st_as_sfc( st_bbox(build.perm.sf.WPS84))),
                       n = c(4, 12) ) %>% 
   st_cast( "POLYGON" ) %>% st_as_sf()   
-
-amphi.insquam.b.sf <- amphibians.sf %>% 
-  st_intersection(squamish.boundary.sf)
 
 
 # Visualize how many data points are in each quadrant within the grid.
@@ -250,8 +247,10 @@ leaflet() %>%
 
 
 
-                                
-#============================= More inaturalist data to get if I have time to treat them. ============           
+
+
+
+# ===== Accesory additional datasets from iNaturalist ==========================================                                       
 
 #Get Inaturalist data for different taxon in Squamish in 2020 using rinat package
 plants <- get_inat_obs (taxon_name = "Plantae", bounds = bounds, year = 2021, 
