@@ -118,7 +118,7 @@ build.perm.sf.WPS84 <- build.perm.sf %>% st_transform(4326)
 #check if CRS has been converted properly. 
 st_crs(build.perm.sf.WPS84)
 
-# Like we did for iNaturalist data ...
+# Do the same we did with iNaturalist data for buiding permits data.
 # Determine some arbitrary popup (small boxes containing arbitrary HTML code, 
 # that point to a specific point on the map)
 build.popup.sf <- build.perm.sf.WPS84 %>% 
@@ -128,7 +128,7 @@ build.popup.sf <- build.perm.sf.WPS84 %>%
                              "style=width:100%;/></p>"))
                             
                              
-# Create HTML tags                              
+# Generate HTML tags                              
 htmltools::p("Building Permits in Squamish",
              htmltools::br(),
              build.perm.sf.WPS84$Issued_Date %>% 
@@ -149,7 +149,7 @@ leaflet(squamish.boundary.sf) %>%
                              
                           
                
-#========================= 5) Make one map combining multiple data sets ====    
+#========================= 5) Make one map combining iNaturalist and buidling permits data ====    
 
 # Bring iNaturalist observations and buidling permits together by compiling 
 # the addCircleMarkers arguments from the two maps we just made. 
@@ -170,10 +170,10 @@ options = layersControlOptions(collapsed = TRUE))
                           
 
 
-#========================= 6) Determine quadrats ... ================================================
+#========================= 6) Determine quadrants ... ================================================
 # ... to count species richness and density and builing permits density at different locations
 # within Squamish boundaries. 
-# The leaflet package allows us to visualize how data poitn is found within each 
+# The leaflet package allows us to visualize how many data points are found within each 
 # predefined grid cell. 
                                 
 # Create e grid of polygons (4x12) based on the boundary-box of the points 
