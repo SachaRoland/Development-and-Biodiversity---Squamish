@@ -8,7 +8,7 @@ Coming soon...
 squamish.boundary.sf <- sf::st_read("Zoning_Classification.shp")
    
 #Read and transform the Squamish Zones Boundary to spatial coordinates   
-build.perm.sf<- sf::st_read("Building_Permits.shp")                 
+build.perm.sf<- sf::st_read("Building_Permits.shp")      
 
 #========================2) Apply Squamish boundary on a map ==========================
 
@@ -29,9 +29,10 @@ bounds <- c(49.63866, -123.26034, 49.87288, -123.01753) --> use a general variab
 
 #================== 3)Extract data from iNaturalist ==============================================
 
-# Get data from specific taxa in Squamihs the Squamish area using rinat package. 
-# use object bound to define the spread of results. 
-# In this case I only collect data amphibians. Teh same process could eb for all taxa and specific species. 
+# Now that we know the geographic dimension of Squamish boundary, we extract iNaturalist data 
+# for a specific location and a specific time using thr rinat package. 
+# In this case I only collect data for amphibians. The same process could be done for all taxa 
+# and/or specific species. 
 
 amphibians <-get_inat_obs (taxon_name = "Amphibia", bounds = bounds, year = 2021, 
                          maxresults = 1000)
@@ -41,13 +42,14 @@ str(amphibians)
 dim(amphibians)
 glimpse(amphibians)     
 
-# See what species and how many individuals within taxon
+# See what species and how many individuals within taxon (stay curious ;)
 sp.rep <- amphibians%>%
   group_by(scientific_name) %>%
   summarise(species = n())
 print(spp_per_group)
 
-# Convert amphibians data into shp file
+# Convert amphibians data into an sf object to get spatial coordinates. 
+# select the variables we are interested in.
 amphibians.sf <- amphibians%>% 
   select(longitude, latitude, datetime, common_name, 
          scientific_name) %>% 
@@ -56,21 +58,27 @@ amphibians.sf <- amphibians%>%
 # Check if only the four columns we are interested in are kept. 
 dim(amphibians.sf)
 
-# Check of all our observations fall within the area
+# Check if all our observations fall within the Squamish District area
 # some points fall outside of boundaries. --> Need to fix. 
-amphibians.out.bound.sf <- amphibians.sf %>% 
+amphi.insquam.b.sf <- amphibians.sf %>% 
   st_intersection(squamish.boundary.sf)
+# Check how many observations are in the area
 nrow(amphibians.out.bound)
 
+#================== 4)Map Inaturalist data using Leaflet ==============================================
+
 # Determine some arbitrary popup (small boxes containing arbitrary HTML code, 
-# that point to a specific point on the map)
-amphibians.popup.sf <- amphibians.sf %>% 
+# that point to a specific point on the map). 
+#
+amphibians.popup.sf <- amphibians.insquamish.sf %>% 
   mutate(popup_html = paste0("<p><b>", common_name, "</b><br/>",
                              "<i>", scientific_name, "</i></p>",
                              "<p>Observed: ", datetime, "<br/>",
-                            "style=width:100%;/></p>"))
+                            "style=width:100%;/></p>"), counts = lengths(
+                              st_intersects(., amphibians.sf)))
+                            
 
-# Create HTML tags                                                 
+# Generate HTML tags                                                 
 htmltools::p("iNaturalist Observations in Squamish",
              htmltools::br(),
              amphibians.sf$datetime %>% 
@@ -78,29 +86,39 @@ htmltools::p("iNaturalist Observations in Squamish",
                range(na.rm = TRUE) %>% 
                paste(collapse = " to "),
              style = "font-weight:bold; font-size:110%")
+
+# Map observations of amphibians in red
+leaflet(squamish.boundary.sf) %>% 
+    addProviderTiles("Esri.WorldStreetMap") %>% 
+    addPolygons(weight = 1) %>% 
+    addCircleMarkers(data = amphibians.popup.sf,
+                                popup = ~popup_html, 
+                                radius = 2, color = "red", weight = 3) 
              
 
-#===================== 4) Check and treat building permits data =====================
-
+#===================== 4) Map building permits data =====================
+# we already made an sf object for data about building permits (build.perm.sf)
 # Familiarize with sf file's CRS type, columns, and geometry. 
 str(build.perm.sf)
 names(build.perm.sf)
 st_crs(build.perm.sf)
-build.perm.sf$geometry    #very strange geometry system. 
+build.perm.sf$geometry    #Notice a different CRS format than for iNaturalist. 
+
 
 # Data files' CRS must be identical for the mapping to work. 
-# See CRS for other data files. 
-
+# Double-check CRS for other data files. 
 st_crs(squamish.boundary.sf)
 st_crs(amphibians.sf). 
 
-# build.perm.sf's CRS is different than squam.boundary and Inaturlist. 
-# Convert weird coordinate system to the same as squam.boundary and Inaturlist
-#(WGS84, EPS=4326)
+# build.perm.sf's CRS is indeed different than squam.boundary and iNaturalist. 
+# Convert weird coordinate system to the same as squam.boundary and iNaturalist
+# --> (WGS84, EPS=4326; We can use the EPS code to do so. 
 build.perm.sf.WPS84 <- build.perm.sf %>% st_transform(4326)
 
+#check if CRS has been converted properly. 
 st_crs(build.perm.sf.WPS84)
 
+# Like we did for iNaturalist data ...
 # Determine some arbitrary popup (small boxes containing arbitrary HTML code, 
 # that point to a specific point on the map)
 build.popup.sf <- build.perm.sf.WPS84 %>% 
@@ -108,7 +126,7 @@ build.popup.sf <- build.perm.sf.WPS84 %>%
                              "<i>", Folder_Typ, "</i></p>",
                              "<p>Observed: ", Project_Na, "<br/>",
                              "style=width:100%;/></p>"))
-                             
+                            
                              
 # Create HTML tags                              
 htmltools::p("Building Permits in Squamish",
@@ -117,15 +135,24 @@ htmltools::p("Building Permits in Squamish",
                as.Date() %>% 
                range(na.rm = TRUE) %>% 
                paste(collapse = " to "),
-             style = "font-weight:bold; font-size:110%")                                                          
+             style = "font-weight:bold; font-size:110%")   
+
+
+# Map building permits in yellow
+leaflet(squamish.boundary.sf) %>% 
+  addProviderTiles("Esri.WorldStreetMap") %>% 
+  addPolygons(weight = 1) %>% 
+  addCircleMarkers(data = build.popup.sf,
+                   popup = ~popup_html, 
+                   radius = 2, color = "yellow", weight = 3)
                              
                              
-                             
-                         
-#========================= 5)Mapping using leaflet =============================================      
+                          
+               
+#========================= 5) Make one map combining multiple data sets ====    
 
 # Bring iNaturalist observations and buidling permits together by compiling 
-# addCircleMarkers arguments
+# the addCircleMarkers arguments from the two maps we just made. 
 
 leaflet(squamish.boundary.sf) %>% 
   addProviderTiles("Esri.WorldStreetMap") %>% 
@@ -135,22 +162,79 @@ leaflet(squamish.boundary.sf) %>%
                    radius = 2, color = "yellow", weight = 3) %>%
 addCircleMarkers(data = amphibians.popup.sf,
                  popup = ~popup_html, 
-                 radius = 2, color = "red", weight = 3, )  
+                 radius = 2, color = "red", weight = 3, ) %>%
+addLayersControl(baseGroups = c("Buidling Permits", "Amphibians"),
+options = layersControlOptions(collapsed = TRUE))   
+
+#This last function allows us to visualize different layers of the map. 
                           
+
 
 #========================= 6) Determine quadrats ... ================================================
 # ... to count species richness and density and builing permits density at different locations
 # within Squamish boundaries. 
+# The leaflet package allows us to visualize how data poitn is found within each 
+# predefined grid cell. 
                                 
-                                
-                                
-                                
-                                
-                                
-                                
-                                
-                                
-                                
+# Create e grid of polygons (4x12) based on the boundary-box of the points 
+# for building permits which are all in Squamish boundary. 
+# Using build.perm.sf.WPS84 therefore allows us to plot the grid within the boundary.
+
+grid <- st_make_grid( st_as_sfc( st_bbox(build.perm.sf.WPS84)),
+                            n = c(4, 12) ) %>% 
+  st_cast( "POLYGON" ) %>% st_as_sf()    
+
+# Count data points in each quadrant within the grid.
+
+# ***** Do it for amphibians *****
+amphi.grid$count <- lengths( st_intersects(grid, amphibians.insquamish.sf))
+
+#add color to polygons based on count
+color.amphi <- colour_values_rgb(palette = "topo", amphi.grid$count, 
+                         include_alpha = FALSE) / 255
+
+
+# Map quadrants for amphibians 
+leaflet() %>% 
+  addTiles() %>% 
+  leafgl::addGlPolygons(data = amphi.grid,
+                         weight = 1,
+                         fillColor = color.amphi,
+                         fillOpacity = 0.7,
+                         popup = ~count, src= 4326) %>%
+  addLegend(pal =  colorNumeric (palette = "topo", domain = amphi.grid$count),
+            values = amphi.grid$count,
+            labFormat = labelFormat(),
+            opacity = 0.85, title = "Points counted per quadrant", 
+            position = "topright", group = "Taxon")
+
+
+# ***** Do it for building permits *****
+build.grid$count <- lengths( st_intersects(grid, build.perm.sf.WPS84))
+
+#add color to polygons based on count for 
+color.build <- colour_values_rgb(palette = "topo", build.grid$count, 
+                         include_alpha = FALSE) / 255
+
+#Map quadrants for building permits 
+leaflet() %>% 
+  addTiles() %>% 
+  leafgl::addGlPolygons(data = build.grid,
+                        weight = 1,
+                        fillColor = color.build,
+                        fillOpacity = 0.7,
+                        popup = ~count, crs= 4326) %>%
+  addLegend(pal =  colorNumeric (palette = "topo", domain = build.grid$count),
+          values = build.grid$count,
+          labFormat = labelFormat(),
+          opacity = 0.85, title = "Points counted per quadrant", 
+          position = "topright", group = "Building Permit")
+
+
+
+
+
+
                                 
 #============================= More inaturalist data to get if I have time to treat them. ============           
 
