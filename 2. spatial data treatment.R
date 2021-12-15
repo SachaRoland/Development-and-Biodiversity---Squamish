@@ -8,7 +8,10 @@
 #======================= 1)Read raw data ============================================
 
 #first unzip required folders 
-unzip (Zoning 
+#***** did this last minute. No time to test it. If doe not work please download files from github 
+# and place all files contained in eahc folder into your working directory.
+unzip("Zoning Data -Squamish")
+unzip("Building_Permits Data - Squamish")
 
 
 
