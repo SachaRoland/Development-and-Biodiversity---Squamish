@@ -7,7 +7,6 @@
 # 1.Main.R        
 # 2.Spatial Data Treatment and Mapping.R
 # 3.Data Analysis.R
-# 4.Figures.R
 
 # === global variables =========================================================
 # declare variables that will be used across the project and should not be 
@@ -69,8 +68,8 @@ for(i in 1:length(folder.names)){
 
 # paths to the folders. The 'p.' indicates the variable is a path.
 # make sure the variable names describe the folder.names
-p.data.raw <- paste(wk.dir, "/", folder.names[1], "/", sep = "")
-p.fig <- paste(wk.dir, "/", folder.names[2], "/", sep = "")
+p.mapping <- paste(wk.dir, "/", folder.names[1], "/", sep = "")
+p.analysis <- paste(wk.dir, "/", folder.names[2], "/", sep = "")
 
 # === run script ===============================================================
 
